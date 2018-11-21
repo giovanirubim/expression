@@ -100,7 +100,7 @@ class ExprNodeVar: public ExprNode {
 		}
 };
 
-class ExprNodeOpr {
+class ExprNodeOpr: public ExprNode {
 	char chr;
 	ExprNode* a;
 	ExprNode* b;
@@ -130,6 +130,73 @@ class ExprNodeOpr {
 		~ExprNodeOpr() {
 			if (a) delete a;
 			if (b) delete b;
+		}
+};
+
+class ExprArgNode {
+	public:
+		ExprNode* tree;
+		ExprArgNode* next;
+		ExprArgNode(ExprNode* tree) {
+			this->tree = tree;
+			next = nullptr;
+		}
+		~ExprArgNode() {
+			if (next) delete next;
+			if (tree) delete tree;
+		}
+};
+
+class ExprNodeCall: public ExprNode {
+	private:
+		std::string id;
+		struct {
+			ExprArgNode* head;
+			ExprArgNode* tail;
+			int size;
+		} list;
+		double (*ref)(const double[]);
+	public:
+		ExprNodeCall(std::string id) {
+			this->id = id;
+			list.head = nullptr;
+			list.tail = nullptr;
+			list.size = 0;
+			ref = nullptr;
+		}
+		void addArg(ExprNode* tree) {
+			ExprArgNode* node = new ExprArgNode(tree);
+			if (list.tail) {
+				list.tail->next = node;
+			} else {
+				list.head = node;
+			}
+			list.tail = node;
+			++ list.size;
+		}
+		double calc() {
+			if (!ref) return 0;
+			double v[list.size], *arg = v;
+			ExprArgNode* node = list.head;
+			while (node) {
+				double val = node->tree ? node->tree->calc() : 0;
+				*arg++ = val;
+				node = node->next;
+			}
+			return ref(v);
+		}
+		std::string toString() {
+			std::string str = id + "(";
+			ExprArgNode* node = list.head;
+			while (node) {
+				if (node != list.head) str += ",";
+				str += node->tree ? node->tree->toString() : "#";
+				node = node->next;
+			}
+			return str + ")";
+		}
+		~ExprNodeCall() {
+			if (list.head) delete list.head;
 		}
 };
 
