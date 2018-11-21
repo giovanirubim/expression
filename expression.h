@@ -127,6 +127,10 @@ class ExprNodeOpr {
 			str += chr;
 			str += b ? b->toString() : "#";
 		}
+		~ExprNodeOpr() {
+			if (a) delete a;
+			if (b) delete b;
+		}
 };
 
 #endif
