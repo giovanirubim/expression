@@ -7,6 +7,8 @@
 
 class ExprNode {
 	public:
+		virtual void setVar(std::string id, double value) {}
+		virtual void setVar(std::string id, double* ref) {}
 		virtual double calc() = 0;
 		virtual std::string toString() = 0;
 };
@@ -38,6 +40,12 @@ class ExprNodeNeg: public ExprNode {
 		ExprNodeNeg(ExprNode* tree) {
 			this->tree = tree;
 		}
+		void setVar(std::string id, double value) {
+			if (tree) tree->setVar(id, value);
+		}
+		void setVar(std::string id, double* ref) {
+			if (tree) tree->setVar(id, ref);
+		}
 		double calc() {
 			if (tree) return - tree->calc();
 			return 0;
@@ -56,6 +64,12 @@ class ExprNodeAbs: public ExprNode {
 	public:
 		ExprNodeAbs(ExprNode* tree) {
 			this->tree = tree;
+		}
+		void setVar(std::string id, double value) {
+			if (tree) tree->setVar(id, value);
+		}
+		void setVar(std::string id, double* ref) {
+			if (tree) tree->setVar(id, ref);
 		}
 		double calc() {
 			double value = tree ? tree->calc() : 0;
@@ -82,13 +96,17 @@ class ExprNodeVar: public ExprNode {
 			ref = nullptr;
 			type = '\0';
 		}
-		void setVal(double value) {
-			this->value = value;
-			type = 'v';
+		void setVar(std::string id, double value) {
+			if (this->id == id) {
+				this->value = value;
+				type = 'v';
+			}
 		}
-		void setRef(const double* ref) {
-			this->ref = ref;
-			type = 'r';
+		void setVar(std::string id, double* ref) {
+			if (this->id == id) {
+				this->ref = ref;
+				type = 'r';
+			}
 		}
 		double calc() {
 			if (type == 'v') return value;
@@ -109,6 +127,14 @@ class ExprNodeOpr: public ExprNode {
 			this->chr = chr;
 			this->a   = a;
 			this->b   = b;
+		}
+		void setVar(std::string id, double value) {
+			if (a) a->setVar(id, value);
+			if (b) b->setVar(id, value);
+		}
+		void setVar(std::string id, double* ref) {
+			if (a) a->setVar(id, ref);
+			if (b) b->setVar(id, ref);
 		}
 		double calc() {
 			double val_a = a ? a->calc() : 0;
@@ -173,6 +199,20 @@ class ExprNodeCall: public ExprNode {
 			}
 			list.tail = node;
 			++ list.size;
+		}
+		void setVar(std::string id, double value) {
+			ExprArgNode* node = list.head;
+			while (node) {
+				if (node->tree) node->tree->setVar(id, value);
+				node = node->next;
+			}
+		}
+		void setVar(std::string id, double* ref) {
+			ExprArgNode* node = list.head;
+			while (node) {
+				if (node->tree) node->tree->setVar(id, ref);
+				node = node->next;
+			}
 		}
 		double calc() {
 			if (!ref) return 0;
