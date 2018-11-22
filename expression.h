@@ -113,6 +113,7 @@ class ExprNode {
 		virtual void setVar(std::string id, double value) {} // Define um valor para uma variável
 		virtual void setVar(std::string id, double* ref) {} // Define uma referência para uma
 		virtual void setCall(std::string id, double(*ref)(const double[])) {}
+		virtual void addVars(std::map <std::string, bool> &map) {}
 		virtual void addToBytecode(ExprBytecode &bytecode) = 0;
 		// variável
 		virtual double calc() = 0; // (temporário) Calcula a sub-árvore que tem este nó como raiz
@@ -164,6 +165,9 @@ class ExprNodeNeg: public ExprNode {
 		void setCall(std::string id, double(*ref)(const double[])) {
 			if (tree) tree->setCall(id, ref);
 		}
+		void addVars(std::map <std::string, bool> &map) {
+			if (tree) tree->addVars(map);
+		}
 		void addToBytecode(ExprBytecode &bytecode) {
 			bytecode.addByte(EXPR_BYTECODE_NEG);
 			tree->addToBytecode(bytecode);
@@ -197,6 +201,9 @@ class ExprNodeAbs: public ExprNode {
 		}
 		void setCall(std::string id, double(*ref)(const double[])) {
 			if (tree) tree->setCall(id, ref);
+		}
+		void addVars(std::map <std::string, bool> &map) {
+			if (tree) tree->addVars(map);
 		}
 		void addToBytecode(ExprBytecode &bytecode) {
 			bytecode.addByte(EXPR_BYTECODE_ABS);
@@ -244,6 +251,9 @@ class ExprNodeVar: public ExprNode {
 				this->ref = ref;
 				type = 'r';
 			}
+		}
+		void addVars(std::map <std::string, bool> &map) {
+			map[id] = type != '\0';
 		}
 		void addToBytecode(ExprBytecode &bytecode) {
 			switch (type) {
@@ -295,6 +305,10 @@ class ExprNodeOpr: public ExprNode {
 		void setCall(std::string id, double(*ref)(const double[])) {
 			if (a) a->setCall(id, ref);
 			if (b) b->setCall(id, ref);
+		}
+		void addVars(std::map <std::string, bool> &map) {
+			if (a) a->addVars(map);
+			if (b) b->addVars(map);
 		}
 		void addToBytecode(ExprBytecode &bytecode) {
 			switch (chr) {
@@ -411,6 +425,13 @@ class ExprNodeCall: public ExprNode {
 				if (node->tree) node->tree->setCall(id, ref);
 				node = node->next;
 			}
+		}
+		void addVars(std::map <std::string, bool> &map) {
+			ExprArgNode* node = list.head;
+			while (node) {
+				if (node->tree) node->tree->addVars(map);
+				node = node->next;
+			}			
 		}
 		void addToBytecode(ExprBytecode &bytecode) {
 			bytecode.addByte(EXPR_BYTECODE_CALL);
