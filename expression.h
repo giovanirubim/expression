@@ -1,14 +1,10 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
-// #include <iostream>
-// using namespace std;
-
 #include <map>
 #include <cmath>
 #include <vector>
 #include <string>
-#include <cstdarg>
 
 typedef double (*TExprFunction) (const double[]);
 
