@@ -870,7 +870,11 @@ public:
 	int countNullVars() {
 		std::map <std::string, bool> map;
 		if (parsedTree) parsedTree->addVarsToMap(map);
-		return map.size();
+		int n = 0;
+		for (auto it=map.begin(), end=map.end(); it!=end; ++it) {
+			n += !it->second;
+		}
+		return n;
 	}
 	double calc() {
 		return parsedTree ? parsedTree->calc() : 0;
