@@ -278,7 +278,7 @@ public:
 		map[id] = type != '\0';
 	}
 	int countArgs() {
-		if (type == 'a') return index + 1;
+		return type == 'a' ? index + 1 : 0;
 	}
 	void addToBytecode(ExprBytecode &bytecode) {
 		switch (type) {
@@ -730,6 +730,7 @@ private:
 			}
 			return new ExprNodeAbs(tree);
 		}
+		return nullptr;
 	}
 	ExprNode* parseOpr2() {
 		bool neg = consumeToken('-');
