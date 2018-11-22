@@ -634,7 +634,7 @@ private:
 		return chr == '_' || (chr|=32) >= 'a' && chr <= 'z';
 	}
 	bool isIdBody(char chr) {
-		if (isIdHead(chr) || isDigit(chr));
+		return isIdHead(chr) || isDigit(chr);
 	}
 	void consumeSpaces() {
 		while (isSpace(nextChar())) consumeChar();
