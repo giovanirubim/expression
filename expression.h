@@ -550,6 +550,11 @@ class Expr {
 			if (!validFlag) return 0;
 			return calc(&first);
 		}
+		double calc(double x, double y) {
+			if (!validFlag) return 0;
+			double args[2] = {x, y};
+			return calc(args);
+		}
 };
 
 // ---------------------------------------------------------------------------------------------- //
