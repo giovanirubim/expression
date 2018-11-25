@@ -125,6 +125,7 @@ public:
 	virtual double calc() = 0; // (temporário) Calcula a sub-árvore que tem este nó como raiz
 	virtual std::string toString() = 0; // (temporário) Formato textual da sub-árvore que tem
 	// este nó como raiz
+	virtual ~ExprNode() {};
 };
 class ExprNodeConst: public ExprNode {
 private:
@@ -533,7 +534,8 @@ class Expr {
 		bool validFlag;
 	public:
 		Expr (ExprNode* tree) {
-			if (validFlag = tree != nullptr) tree->addToBytecode(bytecode);
+			validFlag = tree != nullptr;
+			if (validFlag) tree->addToBytecode(bytecode);
 		}
 		bool valid() {
 			return validFlag;
@@ -636,7 +638,7 @@ private:
 		return chr >= '0' && chr <= '9';
 	}
 	bool isIdHead(char chr) {
-		return chr == '_' || (chr|=32) >= 'a' && chr <= 'z';
+		return chr == '_' || ((chr|=32) >= 'a' && chr <= 'z');
 	}
 	bool isIdBody(char chr) {
 		return isIdHead(chr) || isDigit(chr);
